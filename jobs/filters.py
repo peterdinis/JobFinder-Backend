@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from .models import Job
+from .models import *
 
 class JobFilter(filters.FilterSet):
 
@@ -7,9 +7,9 @@ class JobFilter(filters.FilterSet):
     location = filters.CharFilter(field_name="address", lookup_expr="icontains")
     min_salary = filters.NumberFilter(field_name="salary", lookup_expr="gte")
     max_salary = filters.NumberFilter(field_name="salary", lookup_expr="lte")
-    education = filters.ChoiceFilter(field_name="education", choices=Job.Education.choices)
-    job_type = filters.ChoiceFilter(field_name="job_type", choices=Job.JobType.choices)
-    experience = filters.ChoiceFilter(field_name="experience", choices=Job.Experience.choices)
+    education = filters.ChoiceFilter(field_name="education", choices=Education.choices)
+    job_type = filters.ChoiceFilter(field_name="job_type", choices=JobType.choices)
+    experience = filters.ChoiceFilter(field_name="experience", choices=Experience.choices)
 
     class Meta:
         model = Job
