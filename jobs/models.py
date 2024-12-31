@@ -44,6 +44,7 @@ class Job(models.Model):
     last_date = models.DateTimeField(default=return_date_time)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     jobLocation = models.TextField(max_length=300, default="")
+    contactEmail = models.EmailField(max_length=200, default="", null=True)
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
 
