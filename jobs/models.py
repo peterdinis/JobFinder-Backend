@@ -1,11 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.gis.db import models as gismodels
-from django.contrib.gis.geos import Point
 from django.contrib.auth.models import User
-from django.utils import timezone  # Import timezone for getting the current datetime
+from django.utils import timezone 
 
-# Function to return the current datetime
 def return_date_time():
     return timezone.now()
 
@@ -26,7 +23,7 @@ class Industry(models.TextChoices):
     Education = "Education"
     Others = "Others"
 
-class Experience(models.TextChoices):  # Corrected typo (Expirience -> Experience)
+class Experience(models.TextChoices):
     NO_EXPERIENCE = "No Experience"
     ONE_YEAR = "1 Year"
     TWO_YEAR = "2 Years"
@@ -46,9 +43,9 @@ class Job(models.Model):
     company = models.CharField(max_length=100, null=True, default="")
     last_date = models.DateTimeField(default=return_date_time)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    # Timestamps for record creation and updates
-    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set when the object is created
-    updated_at = models.DateTimeField(auto_now=True)  # Automatically set to current time when the object is updated
+    jobLocation = models.TextField(max_length=300, default="")
+    created_at = models.DateTimeField(auto_now_add=True) 
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
