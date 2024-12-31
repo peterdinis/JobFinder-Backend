@@ -38,7 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
-    "corsheaders"
+    "django.contrib.gis",
+    "django_filters",
+    "corsheaders",
+    "jobs.apps.JobsConfig"
 ]
 
 MIDDLEWARE = [
