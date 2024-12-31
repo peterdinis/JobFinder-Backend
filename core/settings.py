@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'rest_framework_simplejwt',
     "jobs.apps.JobsConfig"
+    "accounts.apps.AccountsConfig"
 ]
 
 MIDDLEWARE = [
