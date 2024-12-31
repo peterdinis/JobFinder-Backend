@@ -5,14 +5,15 @@ from rest_framework import status
 from .serializers import JobSerializer
 from .models import Job
 from django.db.models import Avg, Min, Max, Count
+from .filters import JobFilter
 
 @api_view(["GET"])
 def get_all_jobs(request):
     """
     Retrieve all jobs from the database and return them as a serialized JSON response.
     """
-    jobs = Job.objects.all()
-    serializer = JobSerializer(jobs, many=True)
+    jobs = JobFilter(request.GET, queryset=Job.objects.all().order_by("id"))
+    serializer = JobSerializer(jobs.qs, many=True)
     return Response(serializer.data)
 
 @api_view(["POST"])
