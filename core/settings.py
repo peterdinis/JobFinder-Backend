@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
     'rest_framework_simplejwt',
-    "jobs.apps.JobsConfig"
-    "accounts.apps.AccountsConfig"
+    "jobs",
+    "accounts"
 ]
 
 MIDDLEWARE = [
