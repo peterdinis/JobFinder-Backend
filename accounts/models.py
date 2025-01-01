@@ -9,5 +9,8 @@ class UserProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def save_profile(sender, instance, created, **kwargs):
-    pass
+    user = instance
+    if created:
+        profile = UserProfile(user)
+        profile.save()
     
