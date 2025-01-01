@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from jsonschema import ValidationError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import SignUpSerializers, UserProfileSerializer
 from django.contrib.auth.models import User
 from .models import UserProfile
+from .validators import validate_file_extension
 
 @api_view(["POST"])
 def register_user(request):
@@ -150,9 +152,11 @@ def upload_resume(request):
 
     resume = request.FILES['resume']
 
-    # Optional: Validate file type (only PDF, DOCX, etc.)
-    if not resume.name.endswith(('.pdf', '.docx', '.txt')):
-        return Response({"message": "Invalid file type. Only PDF, DOCX, and TXT are allowed."}, status=status.HTTP_400_BAD_REQUEST)
+    # Validate the file extension
+    try:
+        validate_file_extension(resume)  # Call the validator function
+    except ValidationError as e:
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # Optional: Validate file size (limit to 5MB)
     if resume.size > 5 * 1024 * 1024:  # 5MB
