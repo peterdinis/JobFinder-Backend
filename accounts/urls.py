@@ -12,6 +12,7 @@ urlpatterns = [
 
     # User profile endpoints
     path("user-profile/", views.get_user_profile, name="get_user_profile"),
+    path('upload_resume/', views.upload_resume, name='upload_resume'),
     path("user-profile/create/", views.create_user_profile, name="create_user_profile"),
     path("user-profile/update/", views.update_user_profile, name="update_user_profile"),
 ]

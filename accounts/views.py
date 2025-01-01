@@ -135,3 +135,33 @@ def update_user_profile(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def upload_resume(request):
+    """
+    Upload a resume for the authenticated user.
+    """
+    profile = get_object_or_404(UserProfile, user=request.user)
+
+    # Check if a file is provided
+    if 'resume' not in request.FILES:
+        return Response({"message": "No file provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+    resume = request.FILES['resume']
+
+    # Optional: Validate file type (only PDF, DOCX, etc.)
+    if not resume.name.endswith(('.pdf', '.docx', '.txt')):
+        return Response({"message": "Invalid file type. Only PDF, DOCX, and TXT are allowed."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Optional: Validate file size (limit to 5MB)
+    if resume.size > 5 * 1024 * 1024:  # 5MB
+        return Response({"message": "File is too large. Maximum size is 5MB."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Update the user's profile with the new resume
+    profile.resume = resume
+    profile.save()
+
+    # Return response with updated user profile data
+    serializer = UserProfileSerializer(profile)
+    return Response(serializer.data, status=status.HTTP_200_OK)
