@@ -27,7 +27,7 @@ class SignUpSerializers(serializers.ModelSerializer):
             },
         }
 
-class UserSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     resume = serializers.CharField(source="userprofile.resume")
     class Meta:
         model = UserProfile
