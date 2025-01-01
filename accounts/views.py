@@ -30,7 +30,7 @@ def register_user(request):
         )
         user.save()
 
-        response_serializer = UserSerializer(user)
+        response_serializer = UserProfileSerializer(user)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
     
     return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -43,7 +43,7 @@ def currentUser(request):
     Retrieve the current authenticated user's information.
     """
     user = request.user
-    serializer = UserSerializer(user)
+    serializer = UserProfileSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -54,7 +54,7 @@ def get_all_users(request):
     Retrieve a list of all users (admin only).
     """
     users = User.objects.all()
-    serializer = UserSerializer(users, many=True)
+    serializer = UserProfileSerializer(users, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -65,7 +65,7 @@ def get_user(request, pk):
     Retrieve a specific user by ID.
     """
     user = get_object_or_404(User, pk=pk)
-    serializer = UserSerializer(user)
+    serializer = UserProfileSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -79,7 +79,7 @@ def update_user(request, pk):
     if user != request.user and not request.user.is_staff:
         return Response({"message": "You are not authorized to update this user."}, status=status.HTTP_403_FORBIDDEN)
 
-    serializer = UserSerializer(user, data=request.data, partial=True)
+    serializer = UserProfileSerializer(user, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
