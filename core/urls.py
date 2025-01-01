@@ -10,3 +10,6 @@ urlpatterns = [
     path("accounts/token/verify", TokenVerifyView.as_view()),
     
 ]
+
+handler500 = "utils.error_views.handler500"
+handler404 = "utils.error_views.handler404"
