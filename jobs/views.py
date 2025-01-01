@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import JobSerializer
@@ -7,9 +7,10 @@ from .models import Job
 from django.db.models import Avg, Min, Max, Count
 from .filters import JobFilter
 from rest_framework.pagination import PageNumberPagination
-
+from rest_framework.permissions import IsAuthenticated
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_all_jobs(request):
     """
     Retrieve all jobs from the database and return them as a serialized JSON response.
@@ -32,10 +33,12 @@ def get_all_jobs(request):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_job(request):
     """
     Create a new job entry in the database.
     """
+    request.data["user"] = request.user.id  # Ensure user ID is passed
     serializer = JobSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -44,6 +47,7 @@ def create_job(request):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_job(request, pk):
     """
     Retrieve a single job by its ID.
@@ -53,7 +57,8 @@ def get_job(request, pk):
     return Response(serializer.data)
 
 
-@api_view(["PUT", "PATCH"])
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
 def update_job(request, pk):
     """
     Update an existing job by its ID.
@@ -67,6 +72,7 @@ def update_job(request, pk):
 
 
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def delete_job(request, pk):
     """
     Delete a job by its ID.
@@ -77,6 +83,7 @@ def delete_job(request, pk):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_topic_stats(request, topic):
     """
     Retrieve statistical data for jobs matching a specific topic in the title.
