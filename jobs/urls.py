@@ -12,4 +12,5 @@ urlpatterns = [
     path('user/application_count/', views.get_user_application_count, name='get_user_application_count'),
     path('jobs/<int:pk>/is_applied/', views.is_applied, name='is_applied'),
     path('user/current_jobs/', views.get_current_user_jobs, name='get_current_user_jobs'),
+    path('jobs/<int:pk>/users/', views.get_users_for_job, name='get_users_for_job'),
 ]

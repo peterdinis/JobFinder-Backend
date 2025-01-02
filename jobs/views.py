@@ -203,3 +203,21 @@ def get_current_user_jobs(request):
     serializer = JobSerializer(jobs, many=True)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_users_for_job(request, pk):
+    """
+    Retrieve all users who have applied for a specific job.
+    """
+    job = get_object_or_404(Job, pk=pk)
+    # Get all applications for the job
+    applications = CandidatesAppield.objects.filter(job=job)
+    
+    # Retrieve the users who applied
+    users = [application.user for application in applications]
+    
+    # Serialize the user data
+    users_data = [{"id": user.id, "username": user.username} for user in users]
+
+    return Response(users_data, status=status.HTTP_200_OK)
