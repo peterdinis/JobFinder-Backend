@@ -8,6 +8,8 @@ from django.db.models import Avg, Min, Max, Count
 from .filters import JobFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -38,7 +40,7 @@ def create_job(request):
     """
     Create a new job entry in the database.
     """
-    request.data["user"] = request.user.id  # Ensure user ID is passed
+    request.data["user"] = request.user.id
     serializer = JobSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -113,23 +115,28 @@ def get_topic_stats(request, topic):
         "maximum_salary": stats["max_salary"]
     })
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def apply_to_job(request, pk):
     """
-    Allow a user to apply to a job using a resume.
+    Allow a user to apply to a job using a resume, ensuring the application is within the allowed timeframe.
     """
     job = get_object_or_404(Job, pk=pk)
     user = request.user
 
-    # Check if the user has already applied to this job
+    if job.last_date < timezone.now():
+        return Response(
+            {"error": "The application period for this job has expired."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     if CandidatesAppield.objects.filter(job=job, user=user).exists():
         return Response(
             {"error": "You have already applied for this job."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Validate resume file or URL from the request
     resume = request.data.get("resume")
     if not resume:
         return Response(
@@ -137,7 +144,6 @@ def apply_to_job(request, pk):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Save the application
     application = CandidatesAppield.objects.create(job=job, user=user, resume=resume)
 
     return Response(
@@ -147,3 +153,71 @@ def apply_to_job(request, pk):
         },
         status=status.HTTP_201_CREATED,
     )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_application_count(request):
+    """
+    Retrieve the count of jobs the authenticated user has applied to.
+    """
+    user = request.user
+    application_count = CandidatesAppield.objects.filter(user=user).count()
+
+    return Response(
+        {"user": user.username, "applications_count": application_count},
+        status=status.HTTP_200_OK,
+    )
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def is_applied(request, pk):
+    """
+    Check if the authenticated user has already applied for a specific job.
+    """
+    job = get_object_or_404(Job, pk=pk)
+    user = request.user
+
+    # Check if the user has already applied for this job
+    application_exists = CandidatesAppield.objects.filter(job=job, user=user).exists()
+
+    return Response(
+        {"is_applied": application_exists},
+        status=status.HTTP_200_OK
+    )
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_current_user_jobs(request):
+    """
+    Retrieve all jobs that the authenticated user has applied for.
+    """
+    user = request.user
+    # Get all job applications for the user
+    applications = CandidatesAppield.objects.filter(user=user)
+    
+    # Get the jobs from the application records
+    jobs = [application.job for application in applications]
+
+    # Serialize the job data
+    serializer = JobSerializer(jobs, many=True)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_users_for_job(request, pk):
+    """
+    Retrieve all users who have applied for a specific job.
+    """
+    job = get_object_or_404(Job, pk=pk)
+    # Get all applications for the job
+    applications = CandidatesAppield.objects.filter(job=job)
+    
+    # Retrieve the users who applied
+    users = [application.user for application in applications]
+    
+    # Serialize the user data
+    users_data = [{"id": user.id, "username": user.username} for user in users]
+
+    return Response(users_data, status=status.HTTP_200_OK)
