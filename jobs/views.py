@@ -168,3 +168,38 @@ def get_user_application_count(request):
         {"user": user.username, "applications_count": application_count},
         status=status.HTTP_200_OK,
     )
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def is_applied(request, pk):
+    """
+    Check if the authenticated user has already applied for a specific job.
+    """
+    job = get_object_or_404(Job, pk=pk)
+    user = request.user
+
+    # Check if the user has already applied for this job
+    application_exists = CandidatesAppield.objects.filter(job=job, user=user).exists()
+
+    return Response(
+        {"is_applied": application_exists},
+        status=status.HTTP_200_OK
+    )
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_current_user_jobs(request):
+    """
+    Retrieve all jobs that the authenticated user has applied for.
+    """
+    user = request.user
+    # Get all job applications for the user
+    applications = CandidatesAppield.objects.filter(user=user)
+    
+    # Get the jobs from the application records
+    jobs = [application.job for application in applications]
+
+    # Serialize the job data
+    serializer = JobSerializer(jobs, many=True)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
