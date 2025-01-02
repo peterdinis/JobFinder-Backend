@@ -10,3 +10,4 @@ class CandidatesAppieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = CandidatesAppield
         fields = "__all__"
+        

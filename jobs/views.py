@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import JobSerializer
+from .serializers import JobSerializer, CandidatesAppield
 from .models import Job
 from django.db.models import Avg, Min, Max, Count
 from .filters import JobFilter
@@ -112,3 +112,38 @@ def get_topic_stats(request, topic):
         "minimum_salary": stats["min_salary"],
         "maximum_salary": stats["max_salary"]
     })
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def apply_to_job(request, pk):
+    """
+    Allow a user to apply to a job using a resume.
+    """
+    job = get_object_or_404(Job, pk=pk)
+    user = request.user
+
+    # Check if the user has already applied to this job
+    if CandidatesAppield.objects.filter(job=job, user=user).exists():
+        return Response(
+            {"error": "You have already applied for this job."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Validate resume file or URL from the request
+    resume = request.data.get("resume")
+    if not resume:
+        return Response(
+            {"error": "Resume is required to apply for the job."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Save the application
+    application = CandidatesAppield.objects.create(job=job, user=user, resume=resume)
+
+    return Response(
+        {
+            "message": "You have successfully applied to the job.",
+            "application_id": application.id,
+        },
+        status=status.HTTP_201_CREATED,
+    )
