@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import UserProfile
+from .models import *
+from jobs.models import *
 
 class SignUpSerializers(serializers.ModelSerializer):
     class Meta:
@@ -32,3 +33,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ["first_name", "last_name", "email", "password", "resume"]
+
+class CandidateAppliedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CandidatesAppield
+        fields = ["__all__"]
